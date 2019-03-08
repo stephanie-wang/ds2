@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["main","Configures and runs a new scaling manager"]]});
