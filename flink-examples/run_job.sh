@@ -27,6 +27,6 @@ $FLINK/bin/start-cluster.sh
 sleep 1
 
 
-flink run -c ch.ethz.systems.strymon.ds2.flink.nexmark.queries.Query$QUERY target/flink-examples-1.0-SNAPSHOT-jar-with-dependencies.jar --srcRate $THROUGHPUT --numEvents $NUM_EVENTS
+$FLINK/bin/flink run -c ch.ethz.systems.strymon.ds2.flink.nexmark.queries.Query$QUERY target/flink-examples-1.0-SNAPSHOT-jar-with-dependencies.jar --srcRate $THROUGHPUT --numEvents $NUM_EVENTS
 
 bash collect_latencies.sh $QUERY $THROUGHPUT $FILENAME
