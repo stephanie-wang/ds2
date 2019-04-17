@@ -63,7 +63,7 @@ import java.util.HashSet;
         env.disableOperatorChaining();
 
         final int auctionSrcRate = params.getInt("srcRate", 20000);
-        final int auctionNumEvents = params.getInt("auction-numEvents", 10000000);
+        final int auctionNumEvents = params.getInt("numEvents", 10000000);
 
         final int personSrcRate = params.getInt("person-srcRate", auctionSrcRate / 2);
         final int personNumEvents = params.getInt("person-numEvents", auctionNumEvents / 2);
