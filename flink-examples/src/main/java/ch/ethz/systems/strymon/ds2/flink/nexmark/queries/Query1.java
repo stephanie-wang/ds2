@@ -50,7 +50,7 @@ public class Query1 {
         env.disableOperatorChaining();
 
         // enable latency tracking
-        env.getConfig().setLatencyTrackingInterval(5000);
+        env.getConfig().setLatencyTrackingInterval(1000);
 
         DataStream<Bid> bids = env.addSource(new BidSourceFunction(logger, srcRate, numEvents))
                 .setParallelism(params.getInt("p-source", 1))

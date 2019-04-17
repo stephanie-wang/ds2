@@ -57,7 +57,7 @@ public class Query8 {
         env.getConfig().setAutoWatermarkInterval(1000);
 
         // enable latency tracking
-        env.getConfig().setLatencyTrackingInterval(5000);
+        env.getConfig().setLatencyTrackingInterval(1000);
 
         final int auctionSrcRate = params.getInt("srcRate", 50000);
         final int auctionNumEvents = params.getInt("numEvents", 10000000);

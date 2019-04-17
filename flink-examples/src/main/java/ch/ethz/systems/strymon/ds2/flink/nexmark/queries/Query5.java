@@ -53,7 +53,7 @@ public class Query5 {
         env.getConfig().setAutoWatermarkInterval(1000);
 
         // enable latency tracking
-        env.getConfig().setLatencyTrackingInterval(5000);
+        env.getConfig().setLatencyTrackingInterval(1000);
 
         final int srcRate = params.getInt("srcRate", 100000);
         final int numEvents = params.getInt("numEvents", 10000000);

@@ -53,7 +53,7 @@ public class Query3 {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // enable latency tracking
-        env.getConfig().setLatencyTrackingInterval(5000);
+        env.getConfig().setLatencyTrackingInterval(1000);
 
         env.disableOperatorChaining();
 
