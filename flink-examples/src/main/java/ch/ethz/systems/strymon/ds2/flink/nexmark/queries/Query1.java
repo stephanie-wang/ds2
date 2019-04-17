@@ -42,6 +42,7 @@ public class Query1 {
         final float exchangeRate = params.getFloat("exchange-rate", 0.82F);
 
         final int srcRate = params.getInt("srcRate", 100000);
+        final int numEvents = params.getInt("numEvents", 10000000);
 
         // set up the execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -51,7 +52,7 @@ public class Query1 {
         // enable latency tracking
         env.getConfig().setLatencyTrackingInterval(5000);
 
-        DataStream<Bid> bids = env.addSource(new BidSourceFunction(srcRate))
+        DataStream<Bid> bids = env.addSource(new BidSourceFunction(logger, srcRate, numEvents))
                 .setParallelism(params.getInt("p-source", 1))
                 .name("Bids Source")
                 .uid("Bids-Source");

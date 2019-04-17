@@ -25,6 +25,7 @@ import org.apache.beam.sdk.nexmark.sources.generator.model.AuctionGenerator;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 
 import java.util.Random;
+import org.slf4j.Logger;
 
 /**
  * A ParallelSourceFunction that generates Nexmark Person data
@@ -35,14 +36,22 @@ public class AuctionSourceFunction extends RichParallelSourceFunction<Auction> {
     private final GeneratorConfig config = new GeneratorConfig(NexmarkConfiguration.DEFAULT, 1, 1000L, 0, 1);
     private long eventsCountSoFar = 0;
     private final int rate;
+    private final int maxEvents;
+    private final Logger logger;
 
-    public AuctionSourceFunction(int srcRate) {
+    public AuctionSourceFunction(Logger log, int srcRate, int maxEvents) {
         this.rate = srcRate;
+        if (maxEvents == 0) {
+            maxEvents = 70_000_000;
+        }
+        this.maxEvents = maxEvents;
+        this.logger = log;
     }
 
     @Override
     public void run(SourceContext<Auction> ctx) throws Exception {
-        while (running && eventsCountSoFar < 70_000_000) {
+        long startTime = System.currentTimeMillis();
+        while (running && eventsCountSoFar < maxEvents) {
             long emitStartTime = System.currentTimeMillis();
 
             for (int i = 0; i < rate; i++) {
@@ -59,11 +68,14 @@ public class AuctionSourceFunction extends RichParallelSourceFunction<Auction> {
             }
 
             // Sleep for the rest of timeslice if needed
+            logger.warn("Auction throughput: {}", eventsCountSoFar / (System.currentTimeMillis() - startTime) * 1000);
             long emitTime = System.currentTimeMillis() - emitStartTime;
             if (emitTime < 1000) {
                 Thread.sleep(1000 - emitTime);
             }
         }
+        long finishTime = System.currentTimeMillis();
+        logger.warn("Auction THROUGHPUT: {}", eventsCountSoFar / (finishTime - startTime) * 1000);
     }
 
     @Override

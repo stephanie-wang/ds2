@@ -56,8 +56,9 @@ public class Query5 {
         env.getConfig().setLatencyTrackingInterval(5000);
 
         final int srcRate = params.getInt("srcRate", 100000);
+        final int numEvents = params.getInt("numEvents", 10000000);
 
-        DataStream<Bid> bids = env.addSource(new BidSourceFunction(srcRate))
+        DataStream<Bid> bids = env.addSource(new BidSourceFunction(logger, srcRate, numEvents))
                 .setParallelism(params.getInt("p-bid-source", 1))
                 .assignTimestampsAndWatermarks(new TimestampAssigner());
 

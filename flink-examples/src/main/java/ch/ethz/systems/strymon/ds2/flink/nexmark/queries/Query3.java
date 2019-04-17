@@ -53,19 +53,21 @@ public class Query3 {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // enable latency tracking
-       // env.getConfig().setLatencyTrackingInterval(5000);
+        env.getConfig().setLatencyTrackingInterval(5000);
 
         env.disableOperatorChaining();
 
-        final int auctionSrcRate = params.getInt("auction-srcRate", 20000);
+        final int auctionSrcRate = params.getInt("srcRate", 20000);
+        final int auctionNumEvents = params.getInt("numEvents", 10000000);
 
-        final int personSrcRate = params.getInt("person-srcRate", 10000);
+        final int personSrcRate = params.getInt("person-srcRate", auctionSrcRate / 2);
+        final int personNumEvents = params.getInt("person-numEvents", auctionNumEvents / 2);
 
-        DataStream<Auction> auctions = env.addSource(new AuctionSourceFunction(auctionSrcRate))
+        DataStream<Auction> auctions = env.addSource(new AuctionSourceFunction(logger, auctionSrcRate, auctionNumEvents))
                 .name("Custom Source: Auctions")
                 .setParallelism(params.getInt("p-auction-source", 1));
 
-        DataStream<Person> persons = env.addSource(new PersonSourceFunction(personSrcRate))
+        DataStream<Person> persons = env.addSource(new PersonSourceFunction(logger, personSrcRate, personNumEvents))
                 .name("Custom Source: Persons")
                 .setParallelism(params.getInt("p-person-source", 1))
                 .filter(new FilterFunction<Person>() {
