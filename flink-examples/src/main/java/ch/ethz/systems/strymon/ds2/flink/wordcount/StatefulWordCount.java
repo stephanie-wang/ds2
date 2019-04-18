@@ -29,6 +29,11 @@ public class StatefulWordCount {
 		// make parameters available in the web interface
 		env.getConfig().setGlobalJobParameters(params);
 
+		final checkpoinInterval = params.getInt("checkpoint-interval", -1)
+		if (checkpoinInterval > 0){
+			env.enableCheckpointing(checkpoinInterval);
+		}
+
 		final DataStream<String> text = env.addSource(
 				new RateControlledSourceFunction(
 						params.getInt("source-rate", 80000),
