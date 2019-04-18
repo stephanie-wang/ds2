@@ -15,8 +15,12 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Collector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StatefulWordCount {
+
+	private static final Logger logger  = LoggerFactory.getLogger(StatefulWordCount.class);
 
 	public static void main(String[] args) throws Exception {
 
@@ -58,7 +62,7 @@ public class StatefulWordCount {
 		GenericTypeInfo<Object> objectTypeInfo = new GenericTypeInfo<>(Object.class);
 		// write to dummy sink
 		counts.transform("Latency Sink", objectTypeInfo,
-				new DummySink<>())
+											new DummyLatencyCountingSink<>(logger))
 				.uid("dummy-sink")
 				.setParallelism(params.getInt("p3", 1));
 
