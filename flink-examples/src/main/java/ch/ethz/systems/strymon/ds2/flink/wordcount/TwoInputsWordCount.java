@@ -34,7 +34,8 @@ public class TwoInputsWordCount {
 		final DataStream<String> textOne = env.addSource(
 				new RateControlledSourceFunction(
 						params.getInt("source-rate", 80000),
-						params.getInt("sentence-size", 100)))
+						params.getInt("sentence-size", 100),
+						params.getInt("max-sentences", 100000)))
 				.name("Source One")
 					.setParallelism(params.getInt("p1", 1));
 
