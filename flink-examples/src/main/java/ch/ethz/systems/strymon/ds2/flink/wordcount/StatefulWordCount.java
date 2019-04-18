@@ -1,6 +1,6 @@
 package ch.ethz.systems.strymon.ds2.flink.wordcount;
 
-import ch.ethz.systems.strymon.ds2.flink.nexmark.sinks.DummySink;
+import ch.ethz.systems.strymon.ds2.flink.nexmark.sinks.DummyLatencyCountingSink;
 import ch.ethz.systems.strymon.ds2.flink.wordcount.sources.RateControlledSourceFunction;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
