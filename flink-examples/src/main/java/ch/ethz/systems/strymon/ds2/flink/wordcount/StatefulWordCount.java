@@ -33,6 +33,8 @@ public class StatefulWordCount {
 		// make parameters available in the web interface
 		env.getConfig().setGlobalJobParameters(params);
 
+		env.getConfig().setLatencyTrackingInterval(2000);  //2s
+
 		final int checkpoinInterval = params.getInt("checkpoint-interval", -1);
 		if (checkpoinInterval > 0){
 			env.enableCheckpointing(checkpoinInterval);
