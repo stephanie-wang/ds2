@@ -39,7 +39,7 @@ public class RateControlledSourceFunction extends RichParallelSourceFunction<Str
             ctx.collect(generator.nextSentence(sentenceSize));
             // }
             eventsCountSoFar++;
-            System.out.println(eventsCountSoFar)
+            System.out.println(eventsCountSoFar);
             while (eventsCountSoFar / (System.currentTimeMillis() - startTime) > sentenceRate) {
                 Thread.sleep(0,50000);  // 50us
             }
