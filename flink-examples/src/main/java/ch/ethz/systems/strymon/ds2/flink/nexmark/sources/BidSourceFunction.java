@@ -38,6 +38,7 @@ public class BidSourceFunction extends RichParallelSourceFunction<Bid> {
     private final int rate;
     private final int maxEvents;
     private final Logger logger;
+    private long startTime = 0
 
     public BidSourceFunction(Logger log, int srcRate, int maxEvents) {
         this.rate = srcRate;
@@ -50,30 +51,37 @@ public class BidSourceFunction extends RichParallelSourceFunction<Bid> {
 
     @Override
     public void run(SourceContext<Bid> ctx) throws Exception {
-        long startTime = System.currentTimeMillis();
-        while (running && eventsCountSoFar < maxEvents) {
+        if (startTime == 0) {
+          startTime = System.currentTimeMillis();
+        }
+        while (running && (eventsCountSoFar < maxEvents)) {
             long emitStartTime = System.currentTimeMillis();
 
-            for (int i = 0; i < rate; i++) {
+            // for (int i = 0; i < rate; i++) {
 
-                long nextId = nextId();
-                Random rnd = new Random(nextId);
+            long nextId = nextId();
+            Random rnd = new Random(nextId);
 
-                // When, in event time, we should generate the event. Monotonic.
-                long eventTimestamp =
-                        config.timestampAndInterEventDelayUsForEvent(
-                                config.nextEventNumber(eventsCountSoFar)).getKey();
+            // When, in event time, we should generate the event. Monotonic.
+            long eventTimestamp =
+                      config.timestampAndInterEventDelayUsForEvent(
+                          config.nextEventNumber(eventsCountSoFar)).getKey();
 
-                ctx.collect(BidGenerator.nextBid(nextId, rnd, eventTimestamp, config));
-                eventsCountSoFar++;
+            ctx.collect(BidGenerator.nextBid(nextId, rnd, eventTimestamp, config));
+
+            eventsCountSoFar++;
+
+            while (eventsCountSoFar / (System.currentTimeMillis() - startTime) > rate) {
+                Thread.sleep(0.05);  // 50us
             }
+            // }
 
             // Sleep for the rest of timeslice if needed
             logger.warn("Bid throughput: {}", eventsCountSoFar / (System.currentTimeMillis() - startTime) * 1000);
-            long emitTime = System.currentTimeMillis() - emitStartTime;
-            if (emitTime < 1000) {
-                Thread.sleep(1000 - emitTime);
-            }
+            // long emitTime = System.currentTimeMillis() - emitStartTime;
+            // if (emitTime < 1000) {
+            //     Thread.sleep(1000 - emitTime);
+            // }
         }
         long finishTime = System.currentTimeMillis();
         logger.warn("Bid THROUGHPUT: {}", eventsCountSoFar / (finishTime - startTime) * 1000);

@@ -38,6 +38,8 @@ public class AuctionSourceFunction extends RichParallelSourceFunction<Auction> {
     private final int rate;
     private final int maxEvents;
     private final Logger logger;
+    private long startTime = 0
+    private long eventsCountSoFar = 0
 
     public AuctionSourceFunction(Logger log, int srcRate, int maxEvents) {
         this.rate = srcRate;
@@ -50,29 +52,37 @@ public class AuctionSourceFunction extends RichParallelSourceFunction<Auction> {
 
     @Override
     public void run(SourceContext<Auction> ctx) throws Exception {
-        long startTime = System.currentTimeMillis();
-        while (running && eventsCountSoFar < maxEvents) {
-            long emitStartTime = System.currentTimeMillis();
+        if (startTime == 0) {
+          startTime = System.currentTimeMillis();
+        }
+        while (running && (eventsCountSoFar < maxEvents)) {
+            // long emitStartTime = System.currentTimeMillis();
 
-            for (int i = 0; i < rate; i++) {
-                long nextId = nextId();
-                Random rnd = new Random(nextId);
+            // for (int i = 0; i < rate; i++) {
+            long nextId = nextId();
+            Random rnd = new Random(nextId);
 
-                // When, in event time, we should generate the event. Monotonic.
-                long eventTimestamp =
-                        config.timestampAndInterEventDelayUsForEvent(
-                                config.nextEventNumber(eventsCountSoFar)).getKey();
+            // When, in event time, we should generate the event. Monotonic.
+            long eventTimestamp =
+                    config.timestampAndInterEventDelayUsForEvent(
+                      config.nextEventNumber(eventsCountSoFar)).getKey();
 
-                ctx.collect(AuctionGenerator.nextAuction(eventsCountSoFar, nextId, rnd, eventTimestamp, config));
-                eventsCountSoFar++;
+            ctx.collect(AuctionGenerator.nextAuction(eventsCountSoFar, nextId, rnd, eventTimestamp, config));
+
+            eventsCountSoFar++;
+
+            while (eventsCountSoFar / (System.currentTimeMillis() - startTime) > rate) {
+                Thread.sleep(0.05);  // 50us
             }
+
+            // }
 
             // Sleep for the rest of timeslice if needed
             logger.warn("Auction throughput: {}", eventsCountSoFar / (System.currentTimeMillis() - startTime) * 1000);
-            long emitTime = System.currentTimeMillis() - emitStartTime;
-            if (emitTime < 1000) {
-                Thread.sleep(1000 - emitTime);
-            }
+            // long emitTime = System.currentTimeMillis() - emitStartTime;
+            // if (emitTime < 1000) {
+            //     Thread.sleep(1000 - emitTime);
+            // }
         }
         long finishTime = System.currentTimeMillis();
         logger.warn("Auction THROUGHPUT: {}", eventsCountSoFar / (finishTime - startTime) * 1000);

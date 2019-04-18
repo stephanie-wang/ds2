@@ -15,6 +15,12 @@ public class RateControlledSourceFunction extends RichParallelSourceFunction<Str
 
     private volatile boolean running = true;
 
+    private long startTime = 0;
+
+    private long eventsCountSoFar = 0;
+
+    private final long maxEvents;
+
     public RateControlledSourceFunction(int rate, int size) {
         sentenceRate = rate;
         generator = new RandomSentenceGenerator();
@@ -23,17 +29,23 @@ public class RateControlledSourceFunction extends RichParallelSourceFunction<Str
 
     @Override
     public void run(SourceContext<String> ctx) throws Exception {
+        if (startTime == 0) {
+          startTime = System.currentTimeMillis();
+        }
+        while (running && (eventsCountSoFar < maxEvents)) {
+            // for (int i = 0; i < sentenceRate; i++) {
+            ctx.collect(generator.nextSentence(sentenceSize));
+            // }
+            eventsCountSoFar++;
 
-        while (running) {
-            long emitStartTime = System.currentTimeMillis();
-            for (int i = 0; i < sentenceRate; i++) {
-                ctx.collect(generator.nextSentence(sentenceSize));
+            while (eventsCountSoFar / (System.currentTimeMillis() - startTime) > sentenceRate) {
+                Thread.sleep(0.05);  // 50us
             }
             // Sleep for the rest of timeslice if needed
-            long emitTime = System.currentTimeMillis() - emitStartTime;
-            if (emitTime < 1000) {
-                Thread.sleep(1000 - emitTime);
-            }
+            // long emitTime = System.currentTimeMillis() - emitStartTime;
+            // if (emitTime < 1000) {
+            //     Thread.sleep(1000 - emitTime);
+            // }
         }
 
         ctx.close();
