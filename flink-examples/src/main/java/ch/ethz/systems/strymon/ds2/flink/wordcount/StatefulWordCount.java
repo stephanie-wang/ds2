@@ -32,7 +32,8 @@ public class StatefulWordCount {
 		final DataStream<String> text = env.addSource(
 				new RateControlledSourceFunction(
 						params.getInt("source-rate", 80000),
-						params.getInt("sentence-size", 100)))
+						params.getInt("sentence-size", 100)
+						params.getInt("max-sentences", 100000)))
 				.uid("sentence-source")
 					.setParallelism(params.getInt("p1", 1));
 

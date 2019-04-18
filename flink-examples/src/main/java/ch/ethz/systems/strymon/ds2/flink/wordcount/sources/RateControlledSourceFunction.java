@@ -21,10 +21,11 @@ public class RateControlledSourceFunction extends RichParallelSourceFunction<Str
 
     private final long maxEvents;
 
-    public RateControlledSourceFunction(int rate, int size) {
+    public RateControlledSourceFunction(int rate, int size, int maxSentences) {
         sentenceRate = rate;
         generator = new RandomSentenceGenerator();
         sentenceSize = size;
+        maxEvents = maxSentences
     }
 
     @Override

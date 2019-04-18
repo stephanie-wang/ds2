@@ -38,7 +38,7 @@ public class BidSourceFunction extends RichParallelSourceFunction<Bid> {
     private final int rate;
     private final int maxEvents;
     private final Logger logger;
-    private long startTime = 0
+    private long startTime = 0;
 
     public BidSourceFunction(Logger log, int srcRate, int maxEvents) {
         this.rate = srcRate;
