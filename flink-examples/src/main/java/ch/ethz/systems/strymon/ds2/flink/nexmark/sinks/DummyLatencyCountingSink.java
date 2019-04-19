@@ -46,7 +46,7 @@ public class DummyLatencyCountingSink<T> extends StreamSink<T> {
     @Override
     public void processElement(StreamRecord<T> element) throws Exception {
       // This is only for wordcount
-      logger.warn("%{}%{}", "latency",element);
+      logger.warn("%{}%{}", "latency",element.getValue().f0);
     }
 
     @Override
