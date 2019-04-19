@@ -4,7 +4,7 @@ import ch.ethz.systems.strymon.ds2.common.RandomSentenceGenerator;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 
-public class RateControlledSourceFunction extends RichParallelSourceFunction<String> {
+public class RateControlledSourceFunction extends RichParallelSourceFunction<Tuple2<Long,String>> {
 
     /** how many sentences to output per second **/
     private final int sentenceRate;
