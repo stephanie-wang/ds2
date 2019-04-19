@@ -64,7 +64,7 @@ public class StatefulWordCount {
 					.setParallelism(params.getInt("p3", 1));
 
 		// write to dummy sink
-		counts.addSink(new DummySink<>())
+		counts.addSink(new DummySink<Tuple3<Long, String, Long>())
 				.uid("dummy-sink")
 				.setParallelism(params.getInt("p4", 1));
 
