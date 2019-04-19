@@ -75,8 +75,7 @@ public class StatefulWordCount {
 						int n = rand.nextInt(1000);
 						final String filename = "latencies-" + n + ".log";
 						BufferedWriter fileWriter = new BufferedWriter(new FileWriter(filename));
-					}
-				})
+					})
 				.uid("dummy-sink")
 				.setParallelism(params.getInt("p4", 1));
 
