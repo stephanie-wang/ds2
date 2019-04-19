@@ -44,7 +44,7 @@ public class RateControlledSourceFunction extends RichParallelSourceFunction<Str
             String sentence = generator.nextSentence(sentenceSize);
             count++;
             if (count == samplePeriod){
-              sentence = "" + System.out.currentTimeMillis() + sentence;
+              sentence = "" + System.currentTimeMillis() + sentence;
               count = 0;
             }
             ctx.collect(sentence);

@@ -39,11 +39,11 @@ public class DummySink<T> extends StreamSink<T> {
             // Obtain a number between [0 - 49].
             int n = rand.nextInt(1000);
             final String filename = "latencies-" + n + ".log";
-            BufferedWriter fileWriter = new BufferedWriter(new FileWriter(fileName));
+            BufferedWriter fileWriter = new BufferedWriter(new FileWriter(filename));
 
             @Override
             public void invoke(Tuple3<Long, String, Long> value, Context ctx) throws Exception {
-              fileWriter.write(value.f0);
+              fileWriter.write(""+value.f0);
             }
         });
     }
