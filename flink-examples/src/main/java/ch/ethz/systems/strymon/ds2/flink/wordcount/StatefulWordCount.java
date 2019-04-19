@@ -1,6 +1,6 @@
 package ch.ethz.systems.strymon.ds2.flink.wordcount;
 
-import ch.ethz.systems.strymon.ds2.flink.nexmark.sinks.DummyLatencyCountingSink;
+import ch.ethz.systems.strymon.ds2.flink.nexmark.sinks.DummySink;
 import ch.ethz.systems.strymon.ds2.flink.wordcount.sources.RateControlledSourceFunction;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
@@ -9,6 +9,7 @@ import org.apache.flink.api.common.state.ReducingState;
 import org.apache.flink.api.common.state.ReducingStateDescriptor;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.typeutils.GenericTypeInfo;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
@@ -42,9 +43,9 @@ public class StatefulWordCount {
 
 		final DataStream<String> text = env.addSource(
 				new RateControlledSourceFunction(
-						params.getInt("source-rate", 80000),
+						params.getInt("source-rate", 25000),
 						params.getInt("sentence-size", 100),
-						params.getInt("max-sentences", 100000)))
+						params.getInt("max-sentences", 10000000)))
 				.uid("sentence-source")
 					.setParallelism(params.getInt("p1", 1));
 
@@ -55,16 +56,16 @@ public class StatefulWordCount {
 				.name("Splitter FlatMap")
 				.uid("flatmap")
 					.setParallelism(params.getInt("p2", 1))
-				.keyBy(0)
+				.keyBy(1)
 				.flatMap(new CountWords())
 				.name("Count")
 				.uid("count")
 					.setParallelism(params.getInt("p3", 1));
 
-		GenericTypeInfo<Object> objectTypeInfo = new GenericTypeInfo<>(Object.class);
+		// GenericTypeInfo<Object> objectTypeInfo = new GenericTypeInfo<>(Object.class);
 		// write to dummy sink
 		counts.transform("Latency Sink", objectTypeInfo,
-											new DummyLatencyCountingSink<>(logger))
+											new DummySink<>())
 				.uid("dummy-sink")
 				.setParallelism(params.getInt("p4", 1));
 
@@ -76,24 +77,24 @@ public class StatefulWordCount {
 	// USER FUNCTIONS
 	// *************************************************************************
 
-	public static final class Tokenizer implements FlatMapFunction<String, Tuple2<String, Long>> {
+	public static final class Tokenizer implements FlatMapFunction<String, Tuple3<Long, String, Long>> {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public void flatMap(String value, Collector<Tuple2<String, Long>> out) throws Exception {
+		public void flatMap(String value, Collector<Tuple3<Long, String, Long>> out) throws Exception {
 			// normalize and split the line
 			String[] tokens = value.toLowerCase().split("\\W+");
-
+			Long timestamp = Long.parseLong(tokens[0])
 			// emit the pairs
-			for (String token : tokens) {
-				if (token.length() > 0) {
-					out.collect(new Tuple2<>(token, 1L));
+			for (i=1; i<tokens.length(); i++) {
+				if (tokens[i].length() > 0) {
+					out.collect(new Tuple3<>(timestamp, tokens[i], 1L));
 				}
 			}
 		}
 	}
 
-	public static final class CountWords extends RichFlatMapFunction<Tuple2<String, Long>, Tuple2<String, Long>> {
+	public static final class CountWords extends RichFlatMapFunction<Tuple3<Long, String, Long>, Tuple3<Long, String, Long>> {
 
 		private transient ReducingState<Long> count;
 
@@ -110,9 +111,10 @@ public class StatefulWordCount {
 		}
 
 		@Override
-		public void flatMap(Tuple2<String, Long> value, Collector<Tuple2<String, Long>> out) throws Exception {
-			count.add(value.f1);
-			out.collect(new Tuple2<>(value.f0, count.get()));
+		public void flatMap(Tuple3<Long, String, Long> value, Collector<Tuple3<Long, String, Long>> out) throws Exception {
+			count.add(value.f2);
+			// Keep the timestamp (value.f0) of the new record
+			out.collect(new Tuple3<>(value.f0, value.f1, count.get()));
 		}
 
 		public static final class Count implements ReduceFunction<Long> {

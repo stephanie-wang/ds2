@@ -18,6 +18,7 @@
 
 package ch.ethz.systems.strymon.ds2.flink.nexmark.sinks;
 
+import java.util.Random;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.api.operators.StreamSink;
 
@@ -29,10 +30,17 @@ public class DummySink<T> extends StreamSink<T> {
 
 
     public DummySink() {
-        super(new SinkFunction<T>() {
+        super(new SinkFunction<Tuple3<Long, String, Long>>() {
+            Random rand = new Random();
+            // Obtain a number between [0 - 49].
+            int n = rand.nextInt(1000);
+            final String filename = "latencies-" + n + ".log"
+            BufferedWriter fileWriter = new BufferedWriter(new FileWriter(fileName));
 
             @Override
-            public void invoke(T value, Context ctx) throws Exception {}
+            public void invoke(Tuple3<Long, String, Long> value, Context ctx) throws Exception {
+              fileWriter.write(value.f0);
+            }
         });
     }
 }

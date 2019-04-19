@@ -19,13 +19,18 @@ public class RateControlledSourceFunction extends RichParallelSourceFunction<Str
 
     private long eventsCountSoFar = 0;
 
+    private long count = 0;
+
     private final long maxEvents;
 
-    public RateControlledSourceFunction(int rate, int size, int maxSentences) {
+    private final long samplePeriod;
+
+    public RateControlledSourceFunction(int rate, int size, int maxSentences, int period) {
         sentenceRate = rate;
         generator = new RandomSentenceGenerator();
         sentenceSize = size;
         maxEvents = maxSentences;
+        samplePeriod = period
     }
 
     @Override
@@ -37,15 +42,19 @@ public class RateControlledSourceFunction extends RichParallelSourceFunction<Str
         while (running && (eventsCountSoFar < maxEvents)) {
             // for (int i = 0; i < sentenceRate; i++) {
             String sentence = generator.nextSentence(sentenceSize);
+            count++;
+            if (count == samplePeriod){
+              sentence = "" + System.out.currentTimeMillis() + sentence;
+              count = 0;
+            }
             ctx.collect(sentence);
             // }
             eventsCountSoFar++;
-            System.out.println(eventsCountSoFar);
-            System.out.println(startTime);
-            System.out.println(sentenceRate);
-            System.out.println(System.currentTimeMillis());
+            // System.out.println(eventsCountSoFar);
+            // System.out.println(startTime);
+            // System.out.println(sentenceRate);
+            // System.out.println(System.currentTimeMillis());
             while ((eventsCountSoFar * 1000) / (System.currentTimeMillis() - startTime) > sentenceRate) {
-                System.out.println("Waiting");
                 Thread.sleep(0,50000);  // 50us
             }
             // Sleep for the rest of timeslice if needed
