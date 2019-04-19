@@ -31,7 +31,7 @@ public class DummySink<T> extends StreamSink<T> {
         super(new SinkFunction<T>() {
 
             @Override
-            public void invoke(Tuple3<Long, String, Long> value, Context ctx) throws Exception {
+            public void invoke(T value, Context ctx) throws Exception {
             }
         });
     }

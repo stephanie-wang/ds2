@@ -23,6 +23,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 
 public class StatefulWordCount {
 
