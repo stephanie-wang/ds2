@@ -18,6 +18,11 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.Random;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class StatefulWordCount {
 
@@ -64,7 +69,14 @@ public class StatefulWordCount {
 					.setParallelism(params.getInt("p3", 1));
 
 		// write to dummy sink
-		counts.addSink(new DummySink<>())
+		counts.addSink(new SinkFunction<Tuple3<Long, String, Integer>>() {
+						Random rand = new Random();
+						// Obtain a number between [0 - 49].
+						int n = rand.nextInt(1000);
+						final String filename = "latencies-" + n + ".log";
+						BufferedWriter fileWriter = new BufferedWriter(new FileWriter(filename));
+					}
+				})
 				.uid("dummy-sink")
 				.setParallelism(params.getInt("p4", 1));
 
