@@ -70,7 +70,7 @@ public class AuctionSourceFunction extends RichParallelSourceFunction<Auction> {
 
             eventsCountSoFar++;
 
-            while (eventsCountSoFar / (System.currentTimeMillis() - startTime) > rate) {
+            while ((eventsCountSoFar * 1000)  / (System.currentTimeMillis() - startTime) > rate) {
                 Thread.sleep(0,50000);  // 50us
             }
 
