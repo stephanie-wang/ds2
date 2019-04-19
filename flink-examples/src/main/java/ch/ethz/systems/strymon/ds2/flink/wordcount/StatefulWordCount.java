@@ -84,7 +84,7 @@ public class StatefulWordCount {
 		public void flatMap(String value, Collector<Tuple3<Long, String, Long>> out) throws Exception {
 			// normalize and split the line
 			String[] tokens = value.toLowerCase().split("\\W+");
-			Long timestamp = Long.parseLong(tokens[0])
+			Long timestamp = Long.parseLong(tokens[0]);
 			// emit the pairs
 			for (i=1; i<tokens.length(); i++) {
 				if (tokens[i].length() > 0) {

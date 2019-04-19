@@ -30,7 +30,7 @@ public class RateControlledSourceFunction extends RichParallelSourceFunction<Str
         generator = new RandomSentenceGenerator();
         sentenceSize = size;
         maxEvents = maxSentences;
-        samplePeriod = period
+        samplePeriod = period;
     }
 
     @Override

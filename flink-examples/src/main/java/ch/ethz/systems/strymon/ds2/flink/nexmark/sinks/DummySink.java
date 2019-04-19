@@ -34,7 +34,7 @@ public class DummySink<T> extends StreamSink<T> {
             Random rand = new Random();
             // Obtain a number between [0 - 49].
             int n = rand.nextInt(1000);
-            final String filename = "latencies-" + n + ".log"
+            final String filename = "latencies-" + n + ".log";
             BufferedWriter fileWriter = new BufferedWriter(new FileWriter(fileName));
 
             @Override
