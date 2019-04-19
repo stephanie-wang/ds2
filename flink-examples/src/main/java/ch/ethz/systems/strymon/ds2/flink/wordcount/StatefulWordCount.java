@@ -72,10 +72,18 @@ public class StatefulWordCount {
 		// write to dummy sink
 		counts.addSink(new SinkFunction<Tuple3<Long, String, Long>>(){
 						Random rand = new Random();
-						// Obtain a number between [0 - 49].
 						int n = rand.nextInt(1000);
 						final String filename = "/flink-1.7.2/latencies-" + n + ".log";
-						BufferedWriter fileWriter = new BufferedWriter(new FileWriter(filename));
+						try {
+								FileOutputStream is = new FileOutputStream(filename);
+								OutputStreamWriter osw = new OutputStreamWriter(is);
+								BufferedWriter w = new BufferedWriter(osw);
+						} catch (IOException ex) {
+						    // Report
+						} finally {
+							 fileWriter.close();
+						}
+
 						public void invoke(Tuple3<Long, String, Long> value) throws IOException {
 							fileWriter.write(""+value.f0);
 						}
