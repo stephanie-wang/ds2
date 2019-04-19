@@ -86,7 +86,7 @@ public class StatefulWordCount {
 			String[] tokens = value.toLowerCase().split("\\W+");
 			Long timestamp = Long.parseLong(tokens[0]);
 			// emit the pairs
-			for (i=1; i<tokens.length(); i++) {
+			for (int i=1; i<tokens.length(); i++) {
 				if (tokens[i].length() > 0) {
 					out.collect(new Tuple3<>(timestamp, tokens[i], 1L));
 				}
