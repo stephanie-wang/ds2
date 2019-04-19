@@ -74,7 +74,7 @@ public class StatefulWordCount {
 						Random rand = new Random();
 						// Obtain a number between [0 - 49].
 						int n = rand.nextInt(1000);
-						final String filename = "latencies-" + n + ".log";
+						final String filename = "/flink-1.7.2/latencies-" + n + ".log";
 						BufferedWriter fileWriter = new BufferedWriter(new FileWriter(filename));
 					})
 				.uid("dummy-sink")
