@@ -75,11 +75,10 @@ public class StatefulWordCount {
 		counts.addSink(new SinkFunction<Tuple3<Long, String, Long>>(){
 						Random rand = new Random();
 						int n = rand.nextInt(1000);
-						final String filename = "/flink-1.7.2/latencies-" + n + ".log";
+						final String filename = "/home/ubuntu/flink-1.7.2/latencies-" + n + ".log";
 						FileOutputStream is = new FileOutputStream(filename);
 						OutputStreamWriter osw = new OutputStreamWriter(is);
 						BufferedWriter fileWriter = new BufferedWriter(osw);
-
 						public void invoke(Tuple3<Long, String, Long> value) throws IOException {
 							fileWriter.write(""+value.f0);
 						}
