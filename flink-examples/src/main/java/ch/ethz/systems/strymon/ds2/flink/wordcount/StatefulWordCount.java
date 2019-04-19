@@ -77,7 +77,7 @@ public class StatefulWordCount {
 						final String filename = "/flink-1.7.2/latencies-" + n + ".log";
 						BufferedWriter fileWriter = new BufferedWriter(new FileWriter(filename));
 						public void invoke(Tuple2<String, Integer> value) {
-							fileWriter.write(""+value.f0)
+							fileWriter.write(""+value.f0);
 						}
 					})
 				.uid("dummy-sink")
