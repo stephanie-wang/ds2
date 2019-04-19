@@ -45,7 +45,8 @@ public class StatefulWordCount {
 				new RateControlledSourceFunction(
 						params.getInt("source-rate", 25000),
 						params.getInt("sentence-size", 100),
-						params.getInt("max-sentences", 10000000)))
+						params.getInt("max-sentences", 10000000),
+						params.getInt("sample-period", 1000)))
 				.uid("sentence-source")
 					.setParallelism(params.getInt("p1", 1));
 
