@@ -92,7 +92,7 @@ public class StatefulWordCount {
 			// normalize and split the line
 			String[] tokens = value.f1.toLowerCase().split("\\W+");
 			// emit the pairs
-			for (int i=1; i<tokens.length; i++) {
+			for (int i=0; i<tokens.length; i++) {
 				if (tokens[i].length() > 0) {
 					out.collect(new Tuple3<>(value.f0, tokens[i], 1L));
 				}
