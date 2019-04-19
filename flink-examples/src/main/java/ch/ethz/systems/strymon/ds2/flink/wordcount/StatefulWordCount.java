@@ -70,7 +70,7 @@ public class StatefulWordCount {
 					.setParallelism(params.getInt("p3", 1));
 
 		// write to dummy sink
-		counts.addSink(new SinkFunction<Tuple3<Long, String, Integer>>() {
+		counts.addSink(new SinkFunction<Tuple3<Long, String, Long>>() {
 						Random rand = new Random();
 						// Obtain a number between [0 - 49].
 						int n = rand.nextInt(1000);
