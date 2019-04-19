@@ -43,7 +43,7 @@ public class RateControlledSourceFunction extends RichParallelSourceFunction<Str
         while (running && (eventsCountSoFar < maxEvents)) {
             // for (int i = 0; i < sentenceRate; i++) {
             String sentence = generator.nextSentence(sentenceSize);
-            result = new Tuple2<Long,String>(-1, sentence);
+            Tuple2 result = new Tuple2<Long,String>(new Long(-1), sentence);
             count++;
             if (count == samplePeriod){
               result.setField(System.currentTimeMillis(), 0);
