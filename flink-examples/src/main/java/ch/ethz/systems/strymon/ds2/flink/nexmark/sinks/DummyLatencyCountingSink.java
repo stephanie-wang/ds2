@@ -21,7 +21,7 @@ package ch.ethz.systems.strymon.ds2.flink.nexmark.sinks;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.api.operators.StreamSink;
 import org.apache.flink.streaming.runtime.streamrecord.LatencyMarker;
-
+import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.slf4j.Logger;
 
 
