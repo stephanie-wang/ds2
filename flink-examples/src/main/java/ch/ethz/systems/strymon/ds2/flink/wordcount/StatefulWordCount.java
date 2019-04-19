@@ -22,6 +22,8 @@ import java.util.Random;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
 import java.io.IOException;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 
