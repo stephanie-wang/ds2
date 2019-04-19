@@ -32,6 +32,7 @@ public class RateControlledSourceFunction extends RichParallelSourceFunction<Str
     public void run(SourceContext<String> ctx) throws Exception {
         if (startTime == 0) {
           startTime = System.currentTimeMillis();
+          Thread.sleep(1,0);  // 1ms
         }
         while (running && (eventsCountSoFar < maxEvents)) {
             // for (int i = 0; i < sentenceRate; i++) {
