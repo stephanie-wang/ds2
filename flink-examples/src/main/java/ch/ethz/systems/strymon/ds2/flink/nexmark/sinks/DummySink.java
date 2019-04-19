@@ -25,7 +25,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.api.operators.StreamSink;
-
+import org.apache.flink.api.java.tuple.Tuple3;
 
 /**
  * A Sink that drops all data
