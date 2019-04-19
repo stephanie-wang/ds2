@@ -36,9 +36,17 @@ public class DummyLatencyCountingSink<T> extends StreamSink<T> {
         super(new SinkFunction<T>() {
 
             @Override
-            public void invoke(T value, Context ctx) throws Exception {}
+            public void invoke(T value, Context ctx) throws Exception {
+
+            }
         });
         logger = log;
+    }
+
+    @Override
+    public void processElemet(StreamRecord<T> element) throws Exception {
+      // This is only for wordcount
+      logger.warn("%{}%{}", "latency",element);
     }
 
     @Override

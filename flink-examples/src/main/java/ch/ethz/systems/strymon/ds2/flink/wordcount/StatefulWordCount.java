@@ -49,7 +49,7 @@ public class StatefulWordCount {
 			env.enableCheckpointing(checkpoinInterval);
 		}
 
-		final DataStream<String> text = env.addSource(
+		final DataStream<Tuple2<Long,String>> text = env.addSource(
 				new RateControlledSourceFunction(
 						params.getInt("source-rate", 25000),
 						params.getInt("sentence-size", 100),
@@ -72,18 +72,8 @@ public class StatefulWordCount {
 					.setParallelism(params.getInt("p3", 1));
 
 		// write to dummy sink
-		counts.addSink(new SinkFunction<Tuple3<Long, String, Long>>(){
-						Random rand = new Random();
-						int n = rand.nextInt(1000);
-						final String filename = "/home/ubuntu/flink-1.7.2/latencies-" + n + ".log";
-						FileOutputStream is = new FileOutputStream(filename);
-						OutputStreamWriter osw = new OutputStreamWriter(is);
-						BufferedWriter fileWriter = new BufferedWriter(osw);
-						public void invoke(Tuple3<Long, String, Long> value) throws IOException {
-							fileWriter.write(""+value.f0);
-						}
-					})
-				.uid("dummy-sink")
+		GenericTypeInfo<Object> objectTypeInfo = new GenericTypeInfo<>(Object.class);
+		counts.transform("DummyLatencySink", objectTypeInfo, new DummyLatencyCountingSink<>(logger))
 				.setParallelism(params.getInt("p4", 1));
 
 		// execute program
@@ -94,18 +84,17 @@ public class StatefulWordCount {
 	// USER FUNCTIONS
 	// *************************************************************************
 
-	public static final class Tokenizer implements FlatMapFunction<String, Tuple3<Long, String, Long>> {
+	public static final class Tokenizer implements FlatMapFunction<Tuple2<Long,String>, Tuple3<Long, String, Long>> {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public void flatMap(String value, Collector<Tuple3<Long, String, Long>> out) throws Exception {
+		public void flatMap(Tuple2<Long,String> value, Collector<Tuple3<Long, String, Long>> out) throws Exception {
 			// normalize and split the line
-			String[] tokens = value.toLowerCase().split("\\W+");
-			Long timestamp = Long.parseLong(tokens[0]);
+			String[] tokens = value.f1.toLowerCase().split("\\W+");
 			// emit the pairs
 			for (int i=1; i<tokens.length; i++) {
 				if (tokens[i].length() > 0) {
-					out.collect(new Tuple3<>(timestamp, tokens[i], 1L));
+					out.collect(new Tuple3<>(value.f0, tokens[i], 1L));
 				}
 			}
 		}
@@ -131,7 +120,10 @@ public class StatefulWordCount {
 		public void flatMap(Tuple3<Long, String, Long> value, Collector<Tuple3<Long, String, Long>> out) throws Exception {
 			count.add(value.f2);
 			// Keep the timestamp (value.f0) of the new record
-			out.collect(new Tuple3<>(value.f0, value.f1, count.get()));
+			if (value.f0 != -1){  // If there is an assigned timestamp 
+				elapsedTime = System.currentTimeMillis() - value.f0
+				out.collect(new Tuple3<>(elapsedTime, value.f1, count.get()));
+			}
 		}
 
 		public static final class Count implements ReduceFunction<Long> {

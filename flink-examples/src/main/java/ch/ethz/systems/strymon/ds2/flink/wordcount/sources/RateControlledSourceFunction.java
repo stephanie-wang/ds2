@@ -34,7 +34,7 @@ public class RateControlledSourceFunction extends RichParallelSourceFunction<Str
     }
 
     @Override
-    public void run(SourceContext<String> ctx) throws Exception {
+    public void run(SourceContext<Tuple2<Long,String>> ctx) throws Exception {
         if (startTime == 0) {
           startTime = System.currentTimeMillis();
           Thread.sleep(1,0);  // 1ms
@@ -42,9 +42,10 @@ public class RateControlledSourceFunction extends RichParallelSourceFunction<Str
         while (running && (eventsCountSoFar < maxEvents)) {
             // for (int i = 0; i < sentenceRate; i++) {
             String sentence = generator.nextSentence(sentenceSize);
+            result = nw Tuple2<Long,String>(-1,sentence)
             count++;
             if (count == samplePeriod){
-              sentence = "" + System.currentTimeMillis() + sentence;
+              result.setField(System.currentTimeMillis(), 0)
               count = 0;
             }
             ctx.collect(sentence);
