@@ -121,7 +121,7 @@ public class StatefulWordCount {
 			count.add(value.f2);
 			// Keep the timestamp (value.f0) of the new record
 			if (value.f0 != -1){  // If there is an assigned timestamp
-				elapsedTime = System.currentTimeMillis() - value.f0;
+				Long elapsedTime = System.currentTimeMillis() - value.f0;
 				out.collect(new Tuple3<>(elapsedTime, value.f1, count.get()));
 			}
 		}
