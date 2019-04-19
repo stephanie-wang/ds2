@@ -66,7 +66,7 @@ public class StatefulWordCount {
 		counts.transform("Latency Sink", objectTypeInfo,
 											new DummyLatencyCountingSink<>(logger))
 				.uid("dummy-sink")
-				.setParallelism(params.getInt("p3", 1));
+				.setParallelism(params.getInt("p4", 1));
 
 		// execute program
 		env.execute("Stateful WordCount");

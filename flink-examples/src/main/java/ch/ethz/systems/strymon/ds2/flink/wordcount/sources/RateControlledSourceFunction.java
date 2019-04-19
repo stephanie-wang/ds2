@@ -35,7 +35,9 @@ public class RateControlledSourceFunction extends RichParallelSourceFunction<Str
         }
         while (running && (eventsCountSoFar < maxEvents)) {
             // for (int i = 0; i < sentenceRate; i++) {
-            ctx.collect(generator.nextSentence(sentenceSize));
+            sentence = generator.nextSentence(sentenceSize);
+            System.out.println(sentence);
+            ctx.collect(sentence);
             // }
             eventsCountSoFar++;
             // System.out.println(eventsCountSoFar);

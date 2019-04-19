@@ -71,6 +71,7 @@ public class PersonSourceFunction extends RichParallelSourceFunction<Person> {
             eventsCountSoFar++;
 
             while (eventsCountSoFar / (System.currentTimeMillis() - startTime) > rate) {
+                System.out.println("Waiting");
                 Thread.sleep(0,50000);  // 50us
             }
             // }
