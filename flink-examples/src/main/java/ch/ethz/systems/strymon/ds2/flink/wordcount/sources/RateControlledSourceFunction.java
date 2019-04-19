@@ -35,7 +35,7 @@ public class RateControlledSourceFunction extends RichParallelSourceFunction<Str
     }
 
     @Override
-    public void run(SourceContext<Tuple2<Long,String>> ctx) throws Exception {
+    public void run(SourceContext<String> ctx) throws Exception {
         if (startTime == 0) {
           startTime = System.currentTimeMillis();
           Thread.sleep(1,0);  // 1ms
