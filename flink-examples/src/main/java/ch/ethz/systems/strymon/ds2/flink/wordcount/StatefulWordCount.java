@@ -73,7 +73,7 @@ public class StatefulWordCount {
 
 		// write to dummy sink
 		GenericTypeInfo<Object> objectTypeInfo = new GenericTypeInfo<>(Object.class);
-		counts.transform("DummyLatencySink", objectTypeInfo, new DummyLatencyCountingSink<Tuple2<Long,String>>(logger))
+		counts.transform("DummyLatencySink", objectTypeInfo, new DummyLatencyCountingSink<>(logger))
 				.setParallelism(params.getInt("p4", 1));
 
 		// execute program
