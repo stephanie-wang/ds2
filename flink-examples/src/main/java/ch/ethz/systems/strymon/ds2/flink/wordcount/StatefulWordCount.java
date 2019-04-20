@@ -133,7 +133,7 @@ public class StatefulWordCount {
 				out.collect(new Tuple3<>(elapsedTime, value.f1, count.get()));
 			}
 			if (counter == 10000) {  // Print throughput and reset
-				System.out.printl("Throughput: " + (recordsSoFar / (System.currentTimeMillis() - startTime)));
+				System.out.println("Throughput: " + (recordsSoFar / (System.currentTimeMillis() - startTime)));
 				startTime = System.currentTimeMillis();
 				counter = 0;
 			}
