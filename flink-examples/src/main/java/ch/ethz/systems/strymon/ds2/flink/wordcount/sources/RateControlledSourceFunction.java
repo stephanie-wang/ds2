@@ -4,7 +4,7 @@ import ch.ethz.systems.strymon.ds2.common.RandomSentenceGenerator;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.checkpoint.*;
-import java.util.List;
+import java.util.Collections;
 
 public class RateControlledSourceFunction
               extends RichParallelSourceFunction<Tuple2<Long,String>>
