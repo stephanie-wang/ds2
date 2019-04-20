@@ -86,9 +86,17 @@ public class StatefulWordCount {
 
 	public static final class Tokenizer implements FlatMapFunction<Tuple2<Long,String>, Tuple3<Long, String, Long>> {
 		private static final long serialVersionUID = 1L;
+		private Long startTime = new Long(0);
+		private int recordsSoFar = 0;
+		private int counter = 0;
 
 		@Override
 		public void flatMap(Tuple2<Long,String> value, Collector<Tuple3<Long, String, Long>> out) throws Exception {
+			if (startTime == 0) {
+				startTime = System.currentTimeMillis();
+			}
+			recordsSoFar++;
+			counter++;
 			// normalize and split the line
 			String[] tokens = value.f1.toLowerCase().split("\\W+");
 			// emit the pairs
@@ -96,6 +104,12 @@ public class StatefulWordCount {
 				if (tokens[i].length() > 0) {
 					out.collect(new Tuple3<>(value.f0, tokens[i], 1L));
 				}
+			}
+			if (counter == 100000) {  // Print throughput and reset
+				System.out.println("Flatmap throughput: " + ((recordsSoFar * 1000) / (System.currentTimeMillis() - startTime)));
+				startTime = System.currentTimeMillis();
+				counter = 0;
+				recordsSoFar = 0;
 			}
 		}
 	}
@@ -132,8 +146,8 @@ public class StatefulWordCount {
 				Long elapsedTime = System.currentTimeMillis() - value.f0;
 				out.collect(new Tuple3<>(elapsedTime, value.f1, count.get()));
 			}
-			if (counter == 10000) {  // Print throughput and reset
-				System.out.println("Throughput: " + ((recordsSoFar * 1000) / (System.currentTimeMillis() - startTime)));
+			if (counter == 100000) {  // Print throughput and reset
+				System.out.println("Count throughput: " + ((recordsSoFar * 1000) / (System.currentTimeMillis() - startTime)));
 				startTime = System.currentTimeMillis();
 				counter = 0;
 				recordsSoFar = 0;
