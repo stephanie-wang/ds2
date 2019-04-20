@@ -51,7 +51,8 @@ public class StatefulWordCount {
 		}
 
 		final boolean disableOperatorChaining = params.getBoolean("disable-chaining", false);
-		if disableOperatorChaining {
+		if (disableOperatorChaining) {
+			System.out.println("Disabling chaining.")
 			env.disableOperatorChaining();
 		}
 
