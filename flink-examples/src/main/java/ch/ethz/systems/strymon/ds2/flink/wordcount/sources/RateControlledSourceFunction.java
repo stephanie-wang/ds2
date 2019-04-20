@@ -10,7 +10,7 @@ public class RateControlledSourceFunction
               extends RichParallelSourceFunction<Tuple2<Long,String>>
               implements ListCheckpointed<Tuple2<Long,String>>  {
 
-    private Tuple<Long,String> record;
+    private Tuple2<Long,String> record;
 
     /** flag for job cancellation */
     private volatile boolean isRunning = true;
