@@ -65,8 +65,8 @@ public class RateControlledSourceFunction extends RichParallelSourceFunction<Tup
             //     Thread.sleep(1000 - emitTime);
             // }
         }
-        source_rate = ((eventsCountSoFar * 1000) / (System.currentTimeMillis() - startTime))
-        System.out.println("Source rate: " + source_rate)
+        source_rate = ((eventsCountSoFar * 1000) / (System.currentTimeMillis() - startTime));
+        System.out.println("Source rate: " + source_rate);
         ctx.close();
     }
 
