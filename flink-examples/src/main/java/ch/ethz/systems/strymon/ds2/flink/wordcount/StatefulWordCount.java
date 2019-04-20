@@ -93,7 +93,7 @@ public class StatefulWordCount {
 
 	public static final class Tokenizer implements FlatMapFunction<Tuple2<Long,String>, Tuple3<Long, String, Long>> {
 		private static final long serialVersionUID = 1L;
-		private Long startTime = new Long(0);
+		private Long startTime = 0L;
 		private int recordsSoFar = 0;
 		private int counter = 0;
 
@@ -124,7 +124,7 @@ public class StatefulWordCount {
 	public static final class CountWords extends RichFlatMapFunction<Tuple3<Long, String, Long>, Tuple3<Long, String, Long>> {
 
 		private transient ReducingState<Long> count;
-		private Long startTime = new Long(0);
+		private Long startTime = 0L;
 		private int recordsSoFar = 0;
 		private int counter = 0;
 

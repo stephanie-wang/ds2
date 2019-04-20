@@ -4,7 +4,14 @@ import ch.ethz.systems.strymon.ds2.common.RandomSentenceGenerator;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 
-public class RateControlledSourceFunction extends RichParallelSourceFunction<Tuple2<Long,String>> {
+public class RateControlledSourceFunction
+              extends RichParallelSourceFunction<Tuple2<Long,String>>
+              implements ListCheckpointed<Tuple2<Long,String>>  {
+
+    private Long offset = 0L;
+
+    /** flag for job cancellation */
+    private volatile boolean isRunning = true;
 
     /** how many sentences to output per second **/
     private final int sentenceRate;
@@ -40,24 +47,29 @@ public class RateControlledSourceFunction extends RichParallelSourceFunction<Tup
           startTime = System.currentTimeMillis();
           Thread.sleep(1,0);  // 1ms
         }
+        final Object lock = ctx.getCheckpointLock();
+
         while (running && (eventsCountSoFar < maxEvents)) {
             // for (int i = 0; i < sentenceRate; i++) {
-            String sentence = generator.nextSentence(sentenceSize);
-            Tuple2 result = new Tuple2<Long,String>(new Long(-1), sentence);
-            count++;
-            if (count == samplePeriod){
-              result.setField(System.currentTimeMillis(), 0);
-              count = 0;
-            }
-            ctx.collect(result);
-            // }
-            eventsCountSoFar++;
-            // System.out.println(eventsCountSoFar);
-            // System.out.println(startTime);
-            // System.out.println(sentenceRate);
-            // System.out.println(System.currentTimeMillis());
-            while ((eventsCountSoFar * 1000) / (System.currentTimeMillis() - startTime) > sentenceRate) {
-                Thread.sleep(0,50000);  // 50us
+            synchronized (lock) {
+              String sentence = generator.nextSentence(sentenceSize);
+              Tuple2 result = new Tuple2<Long,String>(-1L, sentence);
+              count++;
+              if (count == samplePeriod){
+                result.setField(System.currentTimeMillis(), 0);
+                count = 0;
+              }
+              ctx.collect(result);
+              // }
+              eventsCountSoFar++;
+              // System.out.println(eventsCountSoFar);
+              // System.out.println(startTime);
+              // System.out.println(sentenceRate);
+              // System.out.println(System.currentTimeMillis());
+              while ((eventsCountSoFar * 1000) / (System.currentTimeMillis() - startTime) > sentenceRate) {
+                  Thread.sleep(0,50000);  // 50us
+              }
+              offset += 1;
             }
             // Sleep for the rest of timeslice if needed
             // long emitTime = System.currentTimeMillis() - emitStartTime;
@@ -73,5 +85,16 @@ public class RateControlledSourceFunction extends RichParallelSourceFunction<Tup
     @Override
     public void cancel() {
         running = false;
+    }
+
+    @Override
+    public List<Tuple2<Long,String>> snapshotState(long checkpointId, long checkpointTimestamp) {
+        return Collections.singletonList(offset);
+    }
+
+    @Override
+    public void restoreState(List<Tuple2<Long,String>> state) {
+        for (Tuple2<Long,String> s : state)
+            offset = s;
     }
 }
