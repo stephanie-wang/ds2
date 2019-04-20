@@ -103,9 +103,9 @@ public class StatefulWordCount {
 	public static final class CountWords extends RichFlatMapFunction<Tuple3<Long, String, Long>, Tuple3<Long, String, Long>> {
 
 		private transient ReducingState<Long> count;
-		private final Long startTime;
-		private Long recordsSoFar = 0;
-		private Long counter = 0;
+		private Long startTime;
+		private int recordsSoFar = 0;
+		private int counter = 0;
 
 		@Override
 		public void open(Configuration parameters) throws Exception {
@@ -136,6 +136,7 @@ public class StatefulWordCount {
 				System.out.println("Throughput: " + (recordsSoFar / (System.currentTimeMillis() - startTime)));
 				startTime = System.currentTimeMillis();
 				counter = 0;
+				recordsSoFar = 0;
 			}
 		}
 
