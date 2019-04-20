@@ -103,7 +103,7 @@ public class StatefulWordCount {
 	public static final class CountWords extends RichFlatMapFunction<Tuple3<Long, String, Long>, Tuple3<Long, String, Long>> {
 
 		private transient ReducingState<Long> count;
-		private Long startTime;
+		private Long startTime = Long(0);
 		private int recordsSoFar = 0;
 		private int counter = 0;
 
@@ -121,22 +121,22 @@ public class StatefulWordCount {
 
 		@Override
 		public void flatMap(Tuple3<Long, String, Long> value, Collector<Tuple3<Long, String, Long>> out) throws Exception {
-			if (this.startTime == 0) {
-				this.startTime = System.currentTimeMillis();
+			if (startTime == 0) {
+				startTime = System.currentTimeMillis();
 			}
-			this.recordsSoFar++;
-			this.counter++;
+			recordsSoFar++;
+			counter++;
 			count.add(value.f2);
 			// Keep the timestamp (value.f0) of the new record
 			if (value.f0 != -1){  // If there is an assigned timestamp
 				Long elapsedTime = System.currentTimeMillis() - value.f0;
 				out.collect(new Tuple3<>(elapsedTime, value.f1, count.get()));
 			}
-			if (this.counter == 10000) {  // Print throughput and reset
-				System.out.println("Throughput: " + (this.recordsSoFar / (System.currentTimeMillis() - this.startTime)));
-				this.startTime = System.currentTimeMillis();
-				this.counter = 0;
-				this.recordsSoFar = 0;
+			if (counter == 10000) {  // Print throughput and reset
+				System.out.println("Throughput: " + (recordsSoFar / (System.currentTimeMillis() - startTime)));
+				startTime = System.currentTimeMillis();
+				counter = 0;
+				recordsSoFar = 0;
 			}
 		}
 
