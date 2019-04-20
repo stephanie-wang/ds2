@@ -39,6 +39,7 @@ public class StatefulWordCount {
 		// set up the execution environment
 		final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
+
 		// make parameters available in the web interface
 		env.getConfig().setGlobalJobParameters(params);
 
@@ -47,6 +48,11 @@ public class StatefulWordCount {
 		final int checkpoinInterval = params.getInt("checkpoint-interval", -1);
 		if (checkpoinInterval > 0){
 			env.enableCheckpointing(checkpoinInterval);
+		}
+
+		final boolean disableOperatorChaining = params.getBoolean("disable-chaining", false);
+		if disableOperatorChaining {
+			env.disableOperatorChaining();
 		}
 
 		final DataStream<Tuple2<Long,String>> text = env.addSource(
