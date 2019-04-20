@@ -10,7 +10,7 @@ public class RateControlledSourceFunction
               extends RichParallelSourceFunction<Tuple2<Long,String>>
               implements ListCheckpointed<Tuple2<Long,String>>  {
 
-    private Long offset = 0L;
+    private Tuple<Long,String> record;
 
     /** flag for job cancellation */
     private volatile boolean isRunning = true;
@@ -55,13 +55,13 @@ public class RateControlledSourceFunction
             // for (int i = 0; i < sentenceRate; i++) {
             synchronized (lock) {
               String sentence = generator.nextSentence(sentenceSize);
-              Tuple2 result = new Tuple2<Long,String>(-1L, sentence);
+              this.record = new Tuple2<Long,String>(-1L, sentence);
               count++;
               if (count == samplePeriod){
-                result.setField(System.currentTimeMillis(), 0);
+                this.record.setField(System.currentTimeMillis(), 0);
                 count = 0;
               }
-              ctx.collect(result);
+              ctx.collect(this.record);
               // }
               eventsCountSoFar++;
               // System.out.println(eventsCountSoFar);
@@ -71,7 +71,6 @@ public class RateControlledSourceFunction
               while ((eventsCountSoFar * 1000) / (System.currentTimeMillis() - startTime) > sentenceRate) {
                   Thread.sleep(0,50000);  // 50us
               }
-              offset += 1;
             }
             // Sleep for the rest of timeslice if needed
             // long emitTime = System.currentTimeMillis() - emitStartTime;
@@ -91,12 +90,12 @@ public class RateControlledSourceFunction
 
     @Override
     public List<Tuple2<Long,String>> snapshotState(long checkpointId, long checkpointTimestamp) {
-        return Collections.singletonList(offset);
+        return Collections.singletonList(this.record);
     }
 
     @Override
     public void restoreState(List<Tuple2<Long,String>> state) {
         for (Tuple2<Long,String> s : state)
-            offset = s;
+            this.record = s;
     }
 }
