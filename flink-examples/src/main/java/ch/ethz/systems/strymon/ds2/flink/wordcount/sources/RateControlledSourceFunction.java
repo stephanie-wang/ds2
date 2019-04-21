@@ -90,13 +90,13 @@ public class RateControlledSourceFunction
 
     @Override
     public List<Tuple2<Long,String>> snapshotState(long checkpointId, long checkpointTimestamp) {
-        System.out.println("Checkpointing state...")
+        System.out.println("Checkpointing state...");
         return Collections.singletonList(this.record);
     }
 
     @Override
     public void restoreState(List<Tuple2<Long,String>> state) {
-        System.out.println("Restoring state...")
+        System.out.println("Restoring state...");
         for (Tuple2<Long,String> s : state)
             this.record = s;
     }
