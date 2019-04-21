@@ -57,12 +57,15 @@ public class StatefulWordCount {
 			env.disableOperatorChaining();
 		}
 
+		final int samplePeriod = params.getInt("sample-period", 1000);
+		System.out.println("Sample period: " + samplePeriod);
+
 		final DataStream<Tuple2<Long,String>> text = env.addSource(
 				new RateControlledSourceFunction(
 						params.getInt("source-rate", 25000),
 						params.getInt("sentence-size", 100),
 						params.getInt("max-sentences", 10000000),
-						params.getInt("sample-period", 1000)))
+						samplePeriod))
 				.uid("sentence-source")
 					.setParallelism(params.getInt("p1", 1));
 
