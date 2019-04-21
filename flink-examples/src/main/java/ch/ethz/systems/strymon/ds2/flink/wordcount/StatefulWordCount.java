@@ -47,6 +47,7 @@ public class StatefulWordCount {
 
 		final int checkpoinInterval = params.getInt("checkpoint-interval", -1);
 		if (checkpoinInterval > 0){
+			System.out.println("Enabling checkpoints.");
 			env.enableCheckpointing(checkpoinInterval);
 		}
 
