@@ -72,7 +72,7 @@ public class StatefulWordCount {
 
 		// split up the lines in pairs (2-tuples) containing:
 		// (word,1)
-		DataStream<Tuple3<Long, String, Long>> counts = text.rebalance()
+		DataStream<Tuple4<Long, Long, String, Long>> counts = text.rebalance()
 				.flatMap(new Tokenizer())
 				.name("Splitter FlatMap")
 				.uid("flatmap")
