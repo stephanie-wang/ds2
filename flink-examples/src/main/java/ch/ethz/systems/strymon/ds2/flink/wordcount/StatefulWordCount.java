@@ -126,7 +126,7 @@ public class StatefulWordCount {
 		}
 	}
 
-	public static final class CountWords extends RichFlatMapFunction<Tuple3<Long, String, Long>, Tuple3<Long, String, Long>> {
+	public static final class CountWords extends RichFlatMapFunction<Tuple3<Long, String, Long>, Tuple4<Long, Long, String, Long>> {
 
 		private transient ReducingState<Long> count;
 		private Long startTime = 0L;
