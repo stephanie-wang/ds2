@@ -32,18 +32,11 @@ public class RateControlledSourceFunction
     // Counter used for assining timestamps to records
     private long count = 0;
 
-    // Counter used for computing record timestamps
-    private long recoveryCounter = 0;
-
     private final long maxEvents;
 
     private final long samplePeriod;
 
     private long recordTimestamp = 0L;
-
-    private boolean steadyState = true;
-
-    private double step = 1000 / sentenceRate;  // in ms
 
     public RateControlledSourceFunction(int rate, int size, int maxSentences, int period) {
         sentenceRate = rate;
@@ -83,7 +76,7 @@ public class RateControlledSourceFunction
               if (emitTime < 1000) {
                   rest = 1000 - emitTime;
                   Thread.sleep(rest);
-                  this.recordTimestamp += rest
+                  this.recordTimestamp += rest;
               }
             }
         }
