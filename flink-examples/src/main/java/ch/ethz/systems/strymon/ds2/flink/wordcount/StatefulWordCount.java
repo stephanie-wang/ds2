@@ -104,7 +104,7 @@ public class StatefulWordCount {
 		private int counter = 0;
 
 		@Override
-		public void flatMap(Tuple2<Long,String,int> value, Collector<Tuple3<Long, String, Long, int>> out) throws Exception {
+		public void flatMap(Tuple3<Long,String,int> value, Collector<Tuple4<Long, String, Long, int>> out) throws Exception {
 			if (startTime == 0) {
 				startTime = System.currentTimeMillis();
 			}
