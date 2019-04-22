@@ -101,7 +101,7 @@ public class RateControlledSourceFunction
     public List<Tuple3<Long,String,Integer>> snapshotState(long checkpointId, long checkpointTimestamp) {
         System.out.println("Checkpointing state...");
         // Make sure checkpointed state has a timestamp
-        if (this.record.f1 == -1) {
+        if (this.record.f0 == -1) {
           this.record.setField(System.currentTimeMillis(),0);
         }
         return Collections.singletonList(this.record);
