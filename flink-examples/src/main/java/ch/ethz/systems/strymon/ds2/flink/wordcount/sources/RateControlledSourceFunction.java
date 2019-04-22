@@ -40,6 +40,8 @@ public class RateControlledSourceFunction
 
     private long recordTimestamp = 0L;
 
+    private double timeslice;
+
     private int id;
 
     public RateControlledSourceFunction(int rate, int size, int maxSentences, int period) {
@@ -60,6 +62,7 @@ public class RateControlledSourceFunction
           // Obtain a number between [0 - 49].
           id = rand.nextInt(1000);
         }
+        timeslice = samplePeriod * 1000 / sentenceRate;
         final Object lock = ctx.getCheckpointLock();
 
         while (running && (eventsCountSoFar < maxEvents)) {
@@ -70,21 +73,23 @@ public class RateControlledSourceFunction
                 this.record = new Tuple3<Long,String,Integer>(-1L, sentence, id);
                 count++;
                 if (count == samplePeriod) {
-                  long timestamp  = this.recordTimestamp +
-                                    System.currentTimeMillis() - emitStartTime;
-                  this.record.setField(timestamp, 0);
+                  this.recordTimestamp += timeslice;
+                  if (recordTimestamp > System.currentTimeMillis()){
+                      Thread.sleep(recordTimestamp - System.currentTimeMillis());
+                  }
+                  this.record.setField(recordTimestamp, 0);
                   count = 0;
                 }
                 ctx.collect(this.record);
                 eventsCountSoFar++;
               }
-              long emitTime = System.currentTimeMillis() - emitStartTime;
-              this.recordTimestamp += emitTime;
-              if (emitTime < 1000) {
-                  long rest = 1000 - emitTime;
-                  Thread.sleep(rest);
-                  this.recordTimestamp += rest;
-              }
+              // long emitTime = System.currentTimeMillis() - emitStartTime;
+              // this.recordTimestamp += emitTime;
+              // if (emitTime < 1000) {
+              //     long rest = 1000 - emitTime;
+              //     Thread.sleep(rest);
+              //     this.recordTimestamp += rest;
+              // }
             }
         }
         double source_rate = ((eventsCountSoFar * 1000) / (System.currentTimeMillis() - startTime));
@@ -102,7 +107,7 @@ public class RateControlledSourceFunction
         System.out.println("Checkpointing state...");
         // Make sure checkpointed state has a timestamp
         if (this.record.f0 == -1) {
-          this.record.setField(System.currentTimeMillis(),0);
+          this.record.setField(recordTimestamp,0);
         }
         return Collections.singletonList(this.record);
     }
