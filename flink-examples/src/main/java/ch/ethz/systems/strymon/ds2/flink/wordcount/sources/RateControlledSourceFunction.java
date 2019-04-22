@@ -95,7 +95,7 @@ public class RateControlledSourceFunction
         System.out.println("Checkpointing state...");
         // Make sure checkpointed state has a timestamp
         if (this.record.f0 == -1) {
-          this.record.setField(System.currentTimeMillis(),0)
+          this.record.setField(System.currentTimeMillis(),0);
         }
         return Collections.singletonList(this.record);
     }
@@ -105,6 +105,6 @@ public class RateControlledSourceFunction
         System.out.println("Restoring state...");
         for (Tuple2<Long,String> s : state)
             this.record = s;
-            this.recordTimestamp = s.f0
+            this.recordTimestamp = s.f0;
     }
 }
