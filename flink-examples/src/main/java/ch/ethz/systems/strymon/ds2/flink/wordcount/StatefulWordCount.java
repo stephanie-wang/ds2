@@ -47,7 +47,7 @@ public class StatefulWordCount {
 
 		// env.getConfig().setLatencyTrackinginterval(1000);  //1s
 
-		final int checkpoininterval = params.getint("checkpoint-interval", -1);
+		final int checkpoininterval = params.getInt("checkpoint-interval", -1);
 		if (checkpoininterval > 0){
 			System.out.println("Enabling checkpoints.");
 			env.enableCheckpointing(checkpoininterval);
@@ -59,17 +59,17 @@ public class StatefulWordCount {
 			env.disableOperatorChaining();
 		}
 
-		final int samplePeriod = params.getint("sample-period", 1000);
+		final int samplePeriod = params.getInt("sample-period", 1000);
 		System.out.println("Sample period: " + samplePeriod);
 
 		final DataStream<Tuple3<Long, String, Integer>> text = env.addSource(
 				new RateControlledSourceFunction(
-						params.getint("source-rate", 25000),
-						params.getint("sentence-size", 100),
-						params.getint("max-sentences", 10000000),
+						params.getInt("source-rate", 25000),
+						params.getInt("sentence-size", 100),
+						params.getInt("max-sentences", 10000000),
 						samplePeriod))
 				.uid("sentence-source")
-					.setParallelism(params.getint("p1", 1));
+					.setParallelism(params.getInt("p1", 1));
 
 		// split up the lines in pairs (2-tuples) containing:
 		// (word,1)
@@ -77,17 +77,17 @@ public class StatefulWordCount {
 				.flatMap(new Tokenizer())
 				.name("Splitter FlatMap")
 				.uid("flatmap")
-					.setParallelism(params.getint("p2", 1))
+					.setParallelism(params.getInt("p2", 1))
 				.keyBy(1)
 				.flatMap(new CountWords())
 				.name("Count")
 				.uid("count")
-					.setParallelism(params.getint("p3", 1));
+					.setParallelism(params.getInt("p3", 1));
 
 		// write to dummy sink
 		GenericTypeInfo<Object> objectTypeInfo = new GenericTypeInfo<>(Object.class);
 		counts.transform("DummyLatencySink", objectTypeInfo, new DummyLatencyCountingSink<>(logger))
-				.setParallelism(params.getint("p4", 1));
+				.setParallelism(params.getInt("p4", 1));
 
 		// execute program
 		env.execute("Stateful WordCount");
