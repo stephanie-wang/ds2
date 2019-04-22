@@ -115,7 +115,7 @@ public class StatefulWordCount {
 			// emit the pairs
 			for (int i=0; i<tokens.length; i++) {
 				if (tokens[i].length() > 0) {
-					out.collect(new Tuple3<>(value.f0, tokens[i], 1L, value.f2));
+					out.collect(new Tuple4<>(value.f0, tokens[i], 1L, value.f2));
 				}
 			}
 			if (counter == 100000) {  // Print throughput and reset
