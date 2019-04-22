@@ -45,12 +45,12 @@ public class StatefulWordCount {
 		// make parameters available in the web interface
 		env.getConfig().setGlobalJobParameters(params);
 
-		// env.getConfig().setLatencyTrackingInterval(1000);  //1s
+		// env.getConfig().setLatencyTrackinginterval(1000);  //1s
 
-		final int checkpoinInterval = params.getInt("checkpoint-interval", -1);
-		if (checkpoinInterval > 0){
+		final int checkpoininterval = params.getint("checkpoint-interval", -1);
+		if (checkpoininterval > 0){
 			System.out.println("Enabling checkpoints.");
-			env.enableCheckpointing(checkpoinInterval);
+			env.enableCheckpointing(checkpoininterval);
 		}
 
 		final boolean disableOperatorChaining = params.getBoolean("disable-chaining", false);
@@ -59,35 +59,35 @@ public class StatefulWordCount {
 			env.disableOperatorChaining();
 		}
 
-		final int samplePeriod = params.getInt("sample-period", 1000);
+		final int samplePeriod = params.getint("sample-period", 1000);
 		System.out.println("Sample period: " + samplePeriod);
 
-		final DataStream<Tuple3<Long, String, Int>> text = env.addSource(
+		final DataStream<Tuple3<Long, String, int>> text = env.addSource(
 				new RateControlledSourceFunction(
-						params.getInt("source-rate", 25000),
-						params.getInt("sentence-size", 100),
-						params.getInt("max-sentences", 10000000),
+						params.getint("source-rate", 25000),
+						params.getint("sentence-size", 100),
+						params.getint("max-sentences", 10000000),
 						samplePeriod))
 				.uid("sentence-source")
-					.setParallelism(params.getInt("p1", 1));
+					.setParallelism(params.getint("p1", 1));
 
 		// split up the lines in pairs (2-tuples) containing:
 		// (word,1)
-		DataStream<Tuple5<Long, Long, String, Long, Int>> counts = text.rebalance()
+		DataStream<Tuple5<Long, Long, String, Long, int>> counts = text.rebalance()
 				.flatMap(new Tokenizer())
 				.name("Splitter FlatMap")
 				.uid("flatmap")
-					.setParallelism(params.getInt("p2", 1))
+					.setParallelism(params.getint("p2", 1))
 				.keyBy(1)
 				.flatMap(new CountWords())
 				.name("Count")
 				.uid("count")
-					.setParallelism(params.getInt("p3", 1));
+					.setParallelism(params.getint("p3", 1));
 
 		// write to dummy sink
 		GenericTypeInfo<Object> objectTypeInfo = new GenericTypeInfo<>(Object.class);
 		counts.transform("DummyLatencySink", objectTypeInfo, new DummyLatencyCountingSink<>(logger))
-				.setParallelism(params.getInt("p4", 1));
+				.setParallelism(params.getint("p4", 1));
 
 		// execute program
 		env.execute("Stateful WordCount");
@@ -97,14 +97,14 @@ public class StatefulWordCount {
 	// USER FUNCTIONS
 	// *************************************************************************
 
-	public static final class Tokenizer implements FlatMapFunction<Tuple3<Long,String,Int>, Tuple4<Long, String, Long, Int>> {
+	public static final class Tokenizer implements FlatMapFunction<Tuple3<Long,String,int>, Tuple4<Long, String, Long, int>> {
 		private static final long serialVersionUID = 1L;
 		private Long startTime = 0L;
 		private int recordsSoFar = 0;
 		private int counter = 0;
 
 		@Override
-		public void flatMap(Tuple2<Long,String,Int> value, Collector<Tuple3<Long, String, Long, Int>> out) throws Exception {
+		public void flatMap(Tuple2<Long,String,int> value, Collector<Tuple3<Long, String, Long, int>> out) throws Exception {
 			if (startTime == 0) {
 				startTime = System.currentTimeMillis();
 			}
@@ -127,7 +127,7 @@ public class StatefulWordCount {
 		}
 	}
 
-	public static final class CountWords extends RichFlatMapFunction<Tuple4<Long, String, Long, Int>, Tuple5<Long, Long, String, Long, Int>> {
+	public static final class CountWords extends RichFlatMapFunction<Tuple4<Long, String, Long, int>, Tuple5<Long, Long, String, Long, int>> {
 
 		private transient ReducingState<Long> count;
 		private Long startTime = 0L;
@@ -147,7 +147,7 @@ public class StatefulWordCount {
 		}
 
 		@Override
-		public void flatMap(Tuple4<Long, String, Long, Int> value, Collector<Tuple5<Long, Long, String, Long, Int>> out) throws Exception {
+		public void flatMap(Tuple4<Long, String, Long, int> value, Collector<Tuple5<Long, Long, String, Long, int>> out) throws Exception {
 			if (startTime == 0) {
 				startTime = System.currentTimeMillis();
 			}
