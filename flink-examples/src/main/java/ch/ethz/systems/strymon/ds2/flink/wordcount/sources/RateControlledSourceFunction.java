@@ -103,8 +103,9 @@ public class RateControlledSourceFunction
     @Override
     public void restoreState(List<Tuple2<Long,String>> state) {
         System.out.println("Restoring state...");
-        for (Tuple2<Long,String> s : state)
+        for (Tuple2<Long,String> s : state){
             this.record = s;
             this.recordTimestamp = s.f0;
+        }
     }
 }
