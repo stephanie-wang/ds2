@@ -9,10 +9,10 @@ import java.util.*;
 import java.util.Random;
 
 public class RateControlledSourceFunction
-              extends RichParallelSourceFunction<Tuple3<Long,String,int>>
-              implements ListCheckpointed<Tuple3<Long,String,int>>  {
+              extends RichParallelSourceFunction<Tuple3<Long,String,Int>>
+              implements ListCheckpointed<Tuple3<Long,String,Int>>  {
 
-    private Tuple2<Long,String> record;
+    private Tuple3<Long,String,Int> record;
 
     /** flag for job cancellation */
     private volatile boolean isRunning = true;
