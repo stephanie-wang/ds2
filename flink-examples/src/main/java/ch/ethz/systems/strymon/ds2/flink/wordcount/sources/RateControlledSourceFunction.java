@@ -67,7 +67,7 @@ public class RateControlledSourceFunction
 
         while (running && (eventsCountSoFar < maxEvents)) {
             synchronized (lock) {
-              long emitStartTime = System.currentTimeMillis();
+              // long emitStartTime = System.currentTimeMillis();
               for (int i = 0; i < sentenceRate; i++) {
                 String sentence = generator.nextSentence(sentenceSize);
                 this.record = new Tuple3<Long,String,Integer>(-1L, sentence, id);
@@ -75,7 +75,9 @@ public class RateControlledSourceFunction
                 if (count == samplePeriod) {
                   this.recordTimestamp += timeslice;
                   if (recordTimestamp > System.currentTimeMillis()){
-                      Thread.sleep(recordTimestamp - System.currentTimeMillis());
+                      long sleepTime = recordTimestamp - System.currentTimeMillis();
+                      System.out.println("Sleep time: " + sleepTime);
+                      Thread.sleep(sleepTime);
                   }
                   this.record.setField(recordTimestamp, 0);
                   count = 0;
