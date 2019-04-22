@@ -63,8 +63,8 @@ public class RateControlledSourceFunction
                 this.record = new Tuple2<Long,String>(-1L, sentence);
                 count++;
                 if (count == samplePeriod) {
-                  timestamp  = this.recordTimestamp +
-                               System.currentTimeMillis() - emitStartTime;
+                  long timestamp  = this.recordTimestamp +
+                                    System.currentTimeMillis() - emitStartTime;
                   this.record.setField(timestamp, 0);
                   count = 0;
                 }
@@ -74,7 +74,7 @@ public class RateControlledSourceFunction
               long emitTime = System.currentTimeMillis() - emitStartTime;
               this.recordTimestamp += emitTime;
               if (emitTime < 1000) {
-                  rest = 1000 - emitTime;
+                  int rest = 1000 - emitTime;
                   Thread.sleep(rest);
                   this.recordTimestamp += rest;
               }
