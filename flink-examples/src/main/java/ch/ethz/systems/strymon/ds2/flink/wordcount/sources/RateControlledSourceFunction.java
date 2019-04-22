@@ -29,11 +29,21 @@ public class RateControlledSourceFunction
 
     private long eventsCountSoFar = 0;
 
+    // Counter used for assining timestamps to records
     private long count = 0;
+
+    // Counter used for computing record timestamps
+    private long recoveryCounter = 0;
 
     private final long maxEvents;
 
     private final long samplePeriod;
+
+    private long recordTimestamp = 0L;
+
+    private boolean steadyState = true;
+
+    private double step = 1000 / sentenceRate;  // in ms
 
     public RateControlledSourceFunction(int rate, int size, int maxSentences, int period) {
         sentenceRate = rate;
@@ -47,36 +57,35 @@ public class RateControlledSourceFunction
     public void run(SourceContext<Tuple2<Long,String>> ctx) throws Exception {
         if (startTime == 0) {
           startTime = System.currentTimeMillis();
+          recordTimestamp = startTime;
           Thread.sleep(1,0);  // 1ms
         }
         final Object lock = ctx.getCheckpointLock();
 
         while (running && (eventsCountSoFar < maxEvents)) {
-            // for (int i = 0; i < sentenceRate; i++) {
             synchronized (lock) {
-              String sentence = generator.nextSentence(sentenceSize);
-              this.record = new Tuple2<Long,String>(-1L, sentence);
-              count++;
-              if (count == samplePeriod){
-                this.record.setField(System.currentTimeMillis(), 0);
-                count = 0;
+              long emitStartTime = System.currentTimeMillis();
+              for (int i = 0; i < sentenceRate; i++) {
+                String sentence = generator.nextSentence(sentenceSize);
+                this.record = new Tuple2<Long,String>(-1L, sentence);
+                count++;
+                if (count == samplePeriod) {
+                  timestamp  = this.recordTimestamp +
+                               System.currentTimeMillis() - emitStartTime;
+                  this.record.setField(timestamp, 0);
+                  count = 0;
+                }
+                ctx.collect(this.record);
+                eventsCountSoFar++;
               }
-              ctx.collect(this.record);
-              // }
-              eventsCountSoFar++;
-              // System.out.println(eventsCountSoFar);
-              // System.out.println(startTime);
-              // System.out.println(sentenceRate);
-              // System.out.println(System.currentTimeMillis());
-              while ((eventsCountSoFar * 1000) / (System.currentTimeMillis() - startTime) > sentenceRate) {
-                  Thread.sleep(0,50000);  // 50us
+              long emitTime = System.currentTimeMillis() - emitStartTime;
+              this.recordTimestamp += emitTime;
+              if (emitTime < 1000) {
+                  rest = 1000 - emitTime;
+                  Thread.sleep(rest);
+                  this.recordTimestamp += rest
               }
             }
-            // Sleep for the rest of timeslice if needed
-            // long emitTime = System.currentTimeMillis() - emitStartTime;
-            // if (emitTime < 1000) {
-            //     Thread.sleep(1000 - emitTime);
-            // }
         }
         double source_rate = ((eventsCountSoFar * 1000) / (System.currentTimeMillis() - startTime));
         System.out.println("Source rate: " + source_rate);
@@ -91,6 +100,10 @@ public class RateControlledSourceFunction
     @Override
     public List<Tuple2<Long,String>> snapshotState(long checkpointId, long checkpointTimestamp) {
         System.out.println("Checkpointing state...");
+        // Make sure checkpointed state has a timestamp
+        if (this.record.f0 == -1) {
+          this.record.setField(System.currentTimeMillis(),0)
+        }
         return Collections.singletonList(this.record);
     }
 
@@ -99,5 +112,6 @@ public class RateControlledSourceFunction
         System.out.println("Restoring state...");
         for (Tuple2<Long,String> s : state)
             this.record = s;
+            this.recordTimestamp = s.f0
     }
 }
