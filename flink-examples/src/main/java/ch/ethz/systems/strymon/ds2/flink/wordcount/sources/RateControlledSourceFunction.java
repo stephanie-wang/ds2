@@ -64,6 +64,7 @@ public class RateControlledSourceFunction
         }
         timeslice = samplePeriod * 1000 / sentenceRate;
         final Object lock = ctx.getCheckpointLock();
+        System.out.println("Record timestamp: " + recordTimestamp);
 
         while (running && (eventsCountSoFar < maxEvents)) {
             synchronized (lock) {
@@ -114,6 +115,7 @@ public class RateControlledSourceFunction
         if (this.record.f0 == -1) {
           this.record.setField(recordTimestamp,0);
         }
+        System.out.println("Checkpointed timestamp: " + recordTimestamp);
         return Collections.singletonList(this.record);
     }
 
@@ -125,5 +127,6 @@ public class RateControlledSourceFunction
             this.recordTimestamp = s.f0;
             id = s.f2;
         }
+        System.out.println("Recovered timestamp: " + recordTimestamp);
     }
 }
