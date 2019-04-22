@@ -40,7 +40,7 @@ public class RateControlledSourceFunction
 
     private long recordTimestamp = 0L;
 
-    private final int id;
+    private int id;
 
     public RateControlledSourceFunction(int rate, int size, int maxSentences, int period) {
         sentenceRate = rate;
@@ -58,7 +58,7 @@ public class RateControlledSourceFunction
           Thread.sleep(1,0);  // 1ms
           Random rand = new Random();
           // Obtain a number between [0 - 49].
-          id = rand.nextint(1000);
+          id = rand.nextInt(1000);
         }
         final Object lock = ctx.getCheckpointLock();
 
