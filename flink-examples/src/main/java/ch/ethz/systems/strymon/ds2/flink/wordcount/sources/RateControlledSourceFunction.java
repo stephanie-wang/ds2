@@ -5,10 +5,11 @@ import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunctio
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.checkpoint.*;
 import java.util.*;
+import java.util.Random;
 
 public class RateControlledSourceFunction
-              extends RichParallelSourceFunction<Tuple2<Long,String>>
-              implements ListCheckpointed<Tuple2<Long,String>>  {
+              extends RichParallelSourceFunction<Tuple2<Long,String,Int>>
+              implements ListCheckpointed<Tuple2<Long,String,Int>>  {
 
     private Tuple2<Long,String> record;
 
@@ -38,6 +39,8 @@ public class RateControlledSourceFunction
 
     private long recordTimestamp = 0L;
 
+    private final int id;
+
     public RateControlledSourceFunction(int rate, int size, int maxSentences, int period) {
         sentenceRate = rate;
         generator = new RandomSentenceGenerator();
@@ -47,11 +50,14 @@ public class RateControlledSourceFunction
     }
 
     @Override
-    public void run(SourceContext<Tuple2<Long,String>> ctx) throws Exception {
+    public void run(SourceContext<Tuple2<Long,String,Int>> ctx) throws Exception {
         if (startTime == 0) {
           startTime = System.currentTimeMillis();
           recordTimestamp = startTime;
           Thread.sleep(1,0);  // 1ms
+          Random rand = new Random();
+          // Obtain a number between [0 - 49].
+          id = rand.nextInt(1000);
         }
         final Object lock = ctx.getCheckpointLock();
 
@@ -60,7 +66,7 @@ public class RateControlledSourceFunction
               long emitStartTime = System.currentTimeMillis();
               for (int i = 0; i < sentenceRate; i++) {
                 String sentence = generator.nextSentence(sentenceSize);
-                this.record = new Tuple2<Long,String>(-1L, sentence);
+                this.record = new Tuple2<Long,String,Int>(-1L, sentence, id);
                 count++;
                 if (count == samplePeriod) {
                   long timestamp  = this.recordTimestamp +
@@ -91,17 +97,17 @@ public class RateControlledSourceFunction
     }
 
     @Override
-    public List<Tuple2<Long,String>> snapshotState(long checkpointId, long checkpointTimestamp) {
+    public List<Tuple2<Long,String,Int>> snapshotState(long checkpointId, long checkpointTimestamp) {
         System.out.println("Checkpointing state...");
         // Make sure checkpointed state has a timestamp
-        if (this.record.f0 == -1) {
+        if (this.record.f1 == -1) {
           this.record.setField(System.currentTimeMillis(),0);
         }
         return Collections.singletonList(this.record);
     }
 
     @Override
-    public void restoreState(List<Tuple2<Long,String>> state) {
+    public void restoreState(List<Tuple2<Long,String,Int>> state) {
         System.out.println("Restoring state...");
         for (Tuple2<Long,String> s : state){
             this.record = s;

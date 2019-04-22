@@ -11,6 +11,7 @@ import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple4;
+import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.typeutils.GenericTypeInfo;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
@@ -61,7 +62,7 @@ public class StatefulWordCount {
 		final int samplePeriod = params.getInt("sample-period", 1000);
 		System.out.println("Sample period: " + samplePeriod);
 
-		final DataStream<Tuple2<Long,String>> text = env.addSource(
+		final DataStream<Tuple3<Long, String, Int>> text = env.addSource(
 				new RateControlledSourceFunction(
 						params.getInt("source-rate", 25000),
 						params.getInt("sentence-size", 100),
@@ -72,7 +73,7 @@ public class StatefulWordCount {
 
 		// split up the lines in pairs (2-tuples) containing:
 		// (word,1)
-		DataStream<Tuple4<Long, Long, String, Long>> counts = text.rebalance()
+		DataStream<Tuple5<Long, Long, String, Long, Int>> counts = text.rebalance()
 				.flatMap(new Tokenizer())
 				.name("Splitter FlatMap")
 				.uid("flatmap")
@@ -96,14 +97,14 @@ public class StatefulWordCount {
 	// USER FUNCTIONS
 	// *************************************************************************
 
-	public static final class Tokenizer implements FlatMapFunction<Tuple2<Long,String>, Tuple3<Long, String, Long>> {
+	public static final class Tokenizer implements FlatMapFunction<Tuple3<Long,String,Int>, Tuple4<Long, String, Long, Int>> {
 		private static final long serialVersionUID = 1L;
 		private Long startTime = 0L;
 		private int recordsSoFar = 0;
 		private int counter = 0;
 
 		@Override
-		public void flatMap(Tuple2<Long,String> value, Collector<Tuple3<Long, String, Long>> out) throws Exception {
+		public void flatMap(Tuple2<Long,String,Int> value, Collector<Tuple3<Long, String, Long, Int>> out) throws Exception {
 			if (startTime == 0) {
 				startTime = System.currentTimeMillis();
 			}
@@ -114,7 +115,7 @@ public class StatefulWordCount {
 			// emit the pairs
 			for (int i=0; i<tokens.length; i++) {
 				if (tokens[i].length() > 0) {
-					out.collect(new Tuple3<>(value.f0, tokens[i], 1L));
+					out.collect(new Tuple3<>(value.f0, tokens[i], 1L, value.f2));
 				}
 			}
 			if (counter == 100000) {  // Print throughput and reset
@@ -126,7 +127,7 @@ public class StatefulWordCount {
 		}
 	}
 
-	public static final class CountWords extends RichFlatMapFunction<Tuple3<Long, String, Long>, Tuple4<Long, Long, String, Long>> {
+	public static final class CountWords extends RichFlatMapFunction<Tuple4<Long, String, Long, Int>, Tuple5<Long, Long, String, Long, Int>> {
 
 		private transient ReducingState<Long> count;
 		private Long startTime = 0L;
@@ -146,7 +147,7 @@ public class StatefulWordCount {
 		}
 
 		@Override
-		public void flatMap(Tuple3<Long, String, Long> value, Collector<Tuple4<Long, Long, String, Long>> out) throws Exception {
+		public void flatMap(Tuple4<Long, String, Long, Int> value, Collector<Tuple5<Long, Long, String, Long, Int>> out) throws Exception {
 			if (startTime == 0) {
 				startTime = System.currentTimeMillis();
 			}
@@ -156,7 +157,7 @@ public class StatefulWordCount {
 			// Keep the timestamp (value.f0) of the new record
 			if (value.f0 != -1){  // If there is an assigned timestamp
 				Long elapsedTime = System.currentTimeMillis() - value.f0;
-				out.collect(new Tuple4<>(value.f0, elapsedTime, value.f1, count.get()));
+				out.collect(new Tuple5<>(value.f0, elapsedTime, value.f1, count.get(), value.f3));
 			}
 			if (counter == 100000) {  // Print throughput and reset
 				System.out.println("Count throughput: " + ((recordsSoFar * 1000) / (System.currentTimeMillis() - startTime)));
