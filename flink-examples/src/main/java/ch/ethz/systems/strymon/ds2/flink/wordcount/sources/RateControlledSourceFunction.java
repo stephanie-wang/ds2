@@ -51,7 +51,7 @@ public class RateControlledSourceFunction
     }
 
     @Override
-    public void run(SourceContext<Tuple3<Long,String,int>> ctx) throws Exception {
+    public void run(SourceContext<Tuple3<Long,String,Int>> ctx) throws Exception {
         if (startTime == 0) {
           startTime = System.currentTimeMillis();
           recordTimestamp = startTime;
@@ -67,7 +67,7 @@ public class RateControlledSourceFunction
               long emitStartTime = System.currentTimeMillis();
               for (int i = 0; i < sentenceRate; i++) {
                 String sentence = generator.nextSentence(sentenceSize);
-                this.record = new Tuple3<Long,String,int>(-1L, sentence, id);
+                this.record = new Tuple3<Long,String,Int>(-1L, sentence, id);
                 count++;
                 if (count == samplePeriod) {
                   long timestamp  = this.recordTimestamp +
@@ -98,7 +98,7 @@ public class RateControlledSourceFunction
     }
 
     @Override
-    public List<Tuple3<Long,String,int>> snapshotState(long checkpointId, long checkpointTimestamp) {
+    public List<Tuple3<Long,String,Int>> snapshotState(long checkpointId, long checkpointTimestamp) {
         System.out.println("Checkpointing state...");
         // Make sure checkpointed state has a timestamp
         if (this.record.f1 == -1) {
@@ -108,9 +108,9 @@ public class RateControlledSourceFunction
     }
 
     @Override
-    public void restoreState(List<Tuple3<Long,String,int>> state) {
+    public void restoreState(List<Tuple3<Long,String,Int>> state) {
         System.out.println("Restoring state...");
-        for (Tuple3<Long,String,int> s : state){
+        for (Tuple3<Long,String,Int> s : state){
             this.record = s;
             this.recordTimestamp = s.f0;
         }

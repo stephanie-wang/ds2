@@ -62,7 +62,7 @@ public class StatefulWordCount {
 		final int samplePeriod = params.getint("sample-period", 1000);
 		System.out.println("Sample period: " + samplePeriod);
 
-		final DataStream<Tuple3<Long, String, int>> text = env.addSource(
+		final DataStream<Tuple3<Long, String, Int>> text = env.addSource(
 				new RateControlledSourceFunction(
 						params.getint("source-rate", 25000),
 						params.getint("sentence-size", 100),
@@ -73,7 +73,7 @@ public class StatefulWordCount {
 
 		// split up the lines in pairs (2-tuples) containing:
 		// (word,1)
-		DataStream<Tuple5<Long, Long, String, Long, int>> counts = text.rebalance()
+		DataStream<Tuple5<Long, Long, String, Long, Int>> counts = text.rebalance()
 				.flatMap(new Tokenizer())
 				.name("Splitter FlatMap")
 				.uid("flatmap")
@@ -97,14 +97,14 @@ public class StatefulWordCount {
 	// USER FUNCTIONS
 	// *************************************************************************
 
-	public static final class Tokenizer implements FlatMapFunction<Tuple3<Long,String,int>, Tuple4<Long, String, Long, int>> {
+	public static final class Tokenizer implements FlatMapFunction<Tuple3<Long,String,Int>, Tuple4<Long, String, Long, Int>> {
 		private static final long serialVersionUID = 1L;
 		private Long startTime = 0L;
 		private int recordsSoFar = 0;
 		private int counter = 0;
 
 		@Override
-		public void flatMap(Tuple3<Long,String,int> value, Collector<Tuple4<Long, String, Long, int>> out) throws Exception {
+		public void flatMap(Tuple3<Long,String,Int> value, Collector<Tuple4<Long, String, Long, Int>> out) throws Exception {
 			if (startTime == 0) {
 				startTime = System.currentTimeMillis();
 			}
@@ -127,7 +127,7 @@ public class StatefulWordCount {
 		}
 	}
 
-	public static final class CountWords extends RichFlatMapFunction<Tuple4<Long, String, Long, int>, Tuple5<Long, Long, String, Long, int>> {
+	public static final class CountWords extends RichFlatMapFunction<Tuple4<Long, String, Long, Int>, Tuple5<Long, Long, String, Long, Int>> {
 
 		private transient ReducingState<Long> count;
 		private Long startTime = 0L;
@@ -147,7 +147,7 @@ public class StatefulWordCount {
 		}
 
 		@Override
-		public void flatMap(Tuple4<Long, String, Long, int> value, Collector<Tuple5<Long, Long, String, Long, int>> out) throws Exception {
+		public void flatMap(Tuple4<Long, String, Long, Int> value, Collector<Tuple5<Long, Long, String, Long, Int>> out) throws Exception {
 			if (startTime == 0) {
 				startTime = System.currentTimeMillis();
 			}
