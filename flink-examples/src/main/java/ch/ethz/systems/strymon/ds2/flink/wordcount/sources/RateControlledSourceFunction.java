@@ -111,8 +111,9 @@ public class RateControlledSourceFunction
     public void restoreState(List<Tuple3<Long,String,Integer>> state) {
         System.out.println("Restoring state...");
         for (Tuple3<Long,String,Integer> s : state){
-            this.record = s;
+            record = s;
             this.recordTimestamp = s.f0;
+            id = s.f2;
         }
     }
 }
