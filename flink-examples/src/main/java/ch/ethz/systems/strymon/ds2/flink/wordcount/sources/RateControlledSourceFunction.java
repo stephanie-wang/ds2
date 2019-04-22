@@ -75,7 +75,7 @@ public class RateControlledSourceFunction
                 if (count == samplePeriod) {
                   this.recordTimestamp += timeslice;
                   if (recordTimestamp > System.currentTimeMillis()){
-                      long curTime = System.currentTimeMillis()
+                      long curTime = System.currentTimeMillis();
                       long sleepTime = recordTimestamp - curTime;
                       System.out.println("Sleep time: " + sleepTime +
                       " Current time: " + curTime +
