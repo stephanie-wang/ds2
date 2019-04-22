@@ -122,10 +122,14 @@ public class RateControlledSourceFunction
     @Override
     public void restoreState(List<Tuple3<Long,String,Integer>> state) {
         System.out.println("Restoring state...");
+        // record = state.get(0);
+        // this.recordTimestamp = s.f0;
+        // id = s.f2;
         for (Tuple3<Long,String,Integer> s : state){
             record = s;
             this.recordTimestamp = s.f0;
             id = s.f2;
+            startTime = System.currentTimeMillis();
         }
         System.out.println("Recovered timestamp: " + recordTimestamp);
     }
