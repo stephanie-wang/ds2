@@ -74,7 +74,7 @@ public class RateControlledSourceFunction
               long emitTime = System.currentTimeMillis() - emitStartTime;
               this.recordTimestamp += emitTime;
               if (emitTime < 1000) {
-                  int rest = 1000 - emitTime;
+                  long rest = 1000 - emitTime;
                   Thread.sleep(rest);
                   this.recordTimestamp += rest;
               }
